@@ -1,16 +1,20 @@
 #root {
   width: 100vw;
-  /* height: max; */
-  margin: 0 ;
+  margin: 0;
   padding: 0;
-  background-color: rgb(198, 198, 198);
+  background-color: #181c21;
 }
 
+/* ----------------------------------------TIMELINE START------------------------------------------------------------------ */
 .vis-timeline {
   border-radius: 12px;
   box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
-  background: white;
+  background-color:white;
   padding: 10px;
+}
+
+.vis-panel .vis-left .vis-vertical-scroll{
+  background-color:#0d0f11;
 }
 
 .vis-item {
@@ -19,7 +23,6 @@
   transition: all 0.3s ease-in-out;
   font-size: 14px;
   font-weight: 500;
-  /* padding: 10px !important; */
 }
 
 .vis-item.red {
@@ -28,22 +31,22 @@
 }
 
 .vis-item.blue {
-  background: #4285F4 !important;
+  background: #4285f4 !important;
   color: white !important;
 }
 
 .vis-item.green {
-  background: #34A853 !important;
+  background: #34a853 !important;
   color: white !important;
 }
 
 .vis-item.yellow {
-  background: #FBBC05 !important;
+  background: #fbbc05 !important;
   color: black !important;
 }
 
 .vis-item.purple {
-  background: #AA66CC !important;
+  background: #aa66cc !important;
   color: white !important;
 }
 
@@ -61,7 +64,7 @@
 }
 
 .vis-tooltip {
-  background-color: black !important;
+  background-color: rgba(0, 0, 0, 0.727) !important;
   color: white !important;
   font-size: 14px !important;
   padding: 8px !important;
@@ -87,9 +90,30 @@
 .vis-label {
   font-size: 14px !important;
   font-weight: bold !important;
-  color: #333 !important; 
+  color: #333 !important;
 }
 
-.vis-labelset .vis-label{
-  border: none
+.vis-panel.vis-left {
+  min-width: 250px !important;
 }
+
+.vis-labelset .vis-label {
+  border: none;
+}
+/* ----------------------------------------TIMELINE END------------------------------------------------------------------ */
+
+.timeline {
+  border-radius: 12px;
+  background: #16191d;
+  box-shadow: -6px -6px 22px #0d0f11, 6px 6px 22px #1f2329;
+}
+
+.group-form, .bt-component, .container-component{
+  background: rgba(0, 0, 0, 0.566);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  backdrop-filter: blur(4.5px);
+  -webkit-backdrop-filter: blur(4.5px);
+  border-radius: 12px;
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
+}
+

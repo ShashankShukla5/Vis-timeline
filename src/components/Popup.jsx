@@ -128,11 +128,11 @@ function Popup({
   return (
     <div
       ref={popUpRef}
-      className="absolute z-20 top-[-1.875rem] left-95 flex flex-col w-fit gap-4 bg-white shadow-2xl text-black rounded-2xl p-2"
+      className="absolute z-20 top-[-1.875rem] left-95 group-form flex flex-col w-80 gap-4 bg-[#161a1f] shadow-2xl text-black rounded-2xl p-4"
     >
-      <p className="mb-5">{eventPop ? "Add new event" : "Edit Event"}</p>
-      <div className="flex gap-2">
-        <label htmlFor="name">Name:</label>
+      <p className="mb-5 text-white">{eventPop ? "Add new event" : "Edit Event"}</p>
+      <div className="flex gap-2 justify-between">
+        <label htmlFor="name" className="text-white">Name:</label>
         <div className="flex flex-col items-start">
           <input
             id="name"
@@ -141,7 +141,7 @@ function Popup({
             defaultValue={eventPop ? "" : defName}
             placeholder="Enter event name"
             onChange={nameChange}
-            className="w-50 py-1 bg-gray-200 rounded-md px-2 focus:outline-none placeholder:text-gray-600"
+            className="w-45 py-1 bg-[#222834] text-white rounded-md px-2 focus:outline-none placeholder:text-gray-600"
           />
           {nameValidation ? (
             <p className="text-red-500 text-[0.625rem]">Name is required</p>
@@ -149,7 +149,7 @@ function Popup({
         </div>
       </div>
       <div className="flex gap-2 justify-between">
-        <label htmlFor="name">Start date:</label>
+        <label htmlFor="name" className="text-white">Start date:</label>
         <div className="flex flex-col items-start">
           <input
             id="name"
@@ -157,7 +157,7 @@ function Popup({
             ref={startRef}
             defaultValue={eventPop ? "" : defSDate}
             onChange={startChange}
-            className="w-40 bg-gray-200 rounded-md px-2 focus:outline-none placeholder:text-gray-400"
+            className="w-45 bg-[#222834] rounded-md px-2 focus:outline-none placeholder:text-gray-600 text-white"
           />
           {sDateValidation ? (
             <p className="text-red-500 text-[0.625rem]">Date is required</p>
@@ -165,7 +165,7 @@ function Popup({
         </div>
       </div>
       <div className="flex gap-2 justify-between">
-        <label htmlFor="name">End date:</label>
+        <label htmlFor="name" className="text-white">End date:</label>
         <div className="flex flex-col items-start">
           <input
             id="name"
@@ -173,7 +173,7 @@ function Popup({
             ref={endRef}
             defaultValue={eventPop ? "" : defEDate}
             onChange={endChange}
-            className="w-40 bg-gray-200 rounded-md px-2 focus:outline-none placeholder:text-gray-400"
+            className="w-45 bg-[#222834] rounded-md px-2 focus:outline-none placeholder:text-gray-600 text-white"
           />
           {eDateValidation ? (
             <p className="text-red-500 text-[0.625rem]">Date is required</p>
@@ -184,7 +184,7 @@ function Popup({
         <div className="flex flex-col gap-3">
           <div className="flex justify-between gap-2">
             <div>
-              <label htmlFor="addevent">Group: </label>
+              <label htmlFor="addevent" className="text-white">Group: </label>
             </div>
             <div>
               <select
@@ -193,13 +193,48 @@ function Popup({
                 ref={groupRef}
                 defaultValue={eventPop ? "" : defGroup}
                 onChange={groupChange}
-                className="text-gray-600 hover:cursor-pointer bg-gray-200 rounded-2xl px-2"
+                className="w-45 text-gray-600 hover:cursor-pointer bg-[#222834] rounded-2xl px-2"
               >
-                <option value="" className="text-black">
+                <option value="">
                   Select a group
                 </option>
-                {groupList.map((group) =>
-                  !group.parentGroup ? (
+                {groupList.map((group) => {
+                  if (group.nestedGroups && group.nestedGroups.length > 0) {
+                    return (
+                      <optgroup
+                        key={group.id}
+                        label={group.content}
+                        className="text-black"
+                      >
+                        {group.nestedGroups.map((nestedId) => {
+                          const nestedGroup = groupList.find(
+                            (g) => g.id === nestedId
+                          );
+                          return (
+                            nestedGroup && (
+                              <option
+                                key={nestedGroup.id}
+                                value={nestedGroup.id}
+                                className="text-black"
+                              >
+                                ─ {nestedGroup.content}
+                              </option>
+                            )
+                          );
+                        })}
+                      </optgroup>
+                    );
+                  }
+                })}
+
+                {groupList
+                  .filter(
+                    (group) =>
+                      !groupList.some((parentGroup) =>
+                        parentGroup.nestedGroups?.includes(group.id)
+                      )
+                  )
+                  .map((group) => (
                     <option
                       key={group.id}
                       value={group.id}
@@ -207,8 +242,7 @@ function Popup({
                     >
                       {group.content}
                     </option>
-                  ) : null
-                )}
+                  ))}
               </select>
               {groupValidation ? (
                 <p className="text-red-500 text-[0.625rem]">
@@ -217,42 +251,11 @@ function Popup({
               ) : null}
             </div>
           </div>
-          {/* <div className="flex justify-between gap-2">
-            <label htmlFor="addevent">Sub-Group: </label>
-            <div>
-              <select
-                name="addevent"
-                id="addevent"
-                ref={groupRef}
-                defaultValue={eventPop ? "" : defGroup}
-                onChange={groupChange}
-                className=" text-gray-600 hover:cursor-pointer bg-gray-200 rounded-2xl px-2 text-[0.75rem]"
-              >
-                <option value="" className="text-black">
-                  Select a sub-group
-                </option>
-                {groupList.map((group) => (
-                  <option
-                    key={group.id}
-                    value={group.id}
-                    className="text-black"
-                  >
-                    {group.content}
-                  </option>
-                ))}
-              </select>
-              {groupValidation ? (
-                <p className="text-red-500 text-[0.625rem]">
-                  Group is required
-                </p>
-              ) : null}
-            </div>
-          </div> */}
         </div>
       </div>
       <button
         onClick={updateEvent}
-        className="bg-blue-500 text-white w-fit px-5 py-1 rounded-2xl m-auto mt-5 hover:cursor-pointer"
+        className="bg-[#4464ab] text-white w-fit px-5 py-1 rounded-2xl m-auto mt-5 hover:cursor-pointer"
       >
         Add
       </button>

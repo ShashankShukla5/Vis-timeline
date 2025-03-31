@@ -8,7 +8,7 @@ import groups from "../utils/groups";
 import GroupForm from "./GroupForm";
 import Popup from "./Popup";
 
-const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
+const VisTimeline = ({ enable, setEnable, eventPop, seteventPop, groupPop, setGroupPop }) => {
   const timelineRef = useRef(null);
   const groupsRef = useRef(null);
   const itemsRef = useRef(new DataSet([]));
@@ -58,8 +58,13 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
         },
         preferZoom: true,
         orientation: "top",
+        editable: true,
         editable: {
           add: false,
+          updateTime: true,
+          updateGroup: true,
+          remove: true,
+          overrideItems: false,
         },
       };
       timelineInstance.current = new Timeline(
@@ -87,8 +92,8 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
         )
       );
 
-      minDate.setDate(minDate.getDate() - 30); 
-      maxDate.setDate(maxDate.getDate() + 31); 
+      minDate.setDate(minDate.getDate() - 60);
+      maxDate.setDate(maxDate.getDate() + 60);
 
       timelineInstance.current.setOptions({
         min: minDate,
@@ -106,12 +111,14 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
 
     timelineInstance.current.on("doubleClick", function (props) {
       if (props.item) {
+        var sDate = new Date(itemsRef.current.get(props.item).start)
+        var eDate = new Date(itemsRef.current.get(props.item).end)
         setEnable(true);
         setdoubleClickId(props.item);
         setdefGroup(itemsRef.current.get(props.item).group);
         setdefName(itemsRef.current.get(props.item).content);
-        setdefSDate(itemsRef.current.get(props.item).start);
-        setdefEDate(itemsRef.current.get(props.item).end);
+        setdefSDate(sDate.toISOString().split("T")[0]);
+        setdefEDate(eDate.toISOString().split("T")[0]);
       }
     });
 
@@ -147,14 +154,16 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
     const colors = ["red", "blue", "green", "yellow", "purple"];
     const newId = countObjects(timelineInstance.current.itemSet.items) + 1;
 
-    // console.log(group)
-    // if(!group){
-    //   setgroup(1)
-    // }
     const newEvent = {
       id: newId,
       content: name ? name : `Event ${newId}`,
-      title: `It is event ${newId}`,
+      title: `It is event ${newId} <br>Start: ${
+        startDate
+          ? startDate.toString()
+          : new Date(start).toISOString().split("T")[0]
+      } <br>End: ${
+        endDate ? endDate.toString() : new Date(end).toISOString().split("T")[0]
+      }`,
       start: startDate
         ? startDate.toString()
         : new Date(start).toISOString().split("T")[0],
@@ -169,7 +178,6 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
     alert("New Item added");
     return;
     timelineInstance.current.redraw();
-    // console.log(itemsRef.current.get())
   };
 
   const addGroup = () => {
@@ -190,16 +198,16 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
         nestedGroups: getGroup.nestedGroups,
         showNested: true,
       });
-      // console.log(groupsRef.current.get());
+
       let parentId = groupId;
       while (parentId) {
         const parentGroup = groupsRef.current.get(parentId);
         if (parentGroup) {
           parentGroup.showNested = true;
           groupsRef.current.update(parentGroup);
-          parentId = parentGroup.parentGroup; // Move to the next ancestor
+          parentId = parentGroup.parentGroup;
         } else {
-          break; // Exit when no more parent groups
+          break;
         }
       }
     }
@@ -214,7 +222,6 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
     groupsRef.current.update(groupsRef.current.get());
     setgroupList(groupsRef.current.get());
     alert("New group added");
-    // timelineInstance.current.redraw();
     return;
     console.log(groupList);
   };
@@ -233,7 +240,6 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
       end: endDate ? endDate : eDate,
       group: group ? group : item.group,
     });
-    // console.log(itemsRef.current.get());
     timelineInstance.current.redraw();
   };
 
@@ -265,8 +271,6 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
       groupsRef.current.update({ ...parentGrp });
     }
 
-    // console.log(parentGrp)
-
     const groupItems = itemsRef.current.get({
       filter: (item) => item.group === groupId,
     });
@@ -274,13 +278,11 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
     alert("Group Deleted");
     groupsRef.current.remove(groupId);
 
-    // console.log(`Deleted Group ${groupId}`);
     groupSelectRef.current.value = "";
     setgroupList(groupsRef.current.get());
   };
 
   const showEvents = () => {
-    // console.log("All Events:", itemsRef.current.get());
     const events = itemsRef.current.get();
     setEventsList(JSON.stringify(events, null, 2));
   };
@@ -332,12 +334,13 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
           setdefName={setdefName}
           setdefSDate={setdefSDate}
           setdefEDate={setdefEDate}
+          eventPop={eventPop}
+          seteventPop={seteventPop}
         />
       ) : null}
-      {/* <Popup /> */}
       <div
         ref={timelineRef}
-        className="w-full h-[14.0625rem] overflow-y-auto"
+        className="timeline w-full h-[14.0625rem] overflow-y-auto"
       />
       <div className="flex gap-10">
         {eventPop ? (
@@ -363,35 +366,38 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
             setdefEDate={setdefEDate}
           />
         ) : null}
-        {/* <Form
-          setgroup={setgroup}
-          setname={setname}
-          addEvent={addEvent}
-          groupList={groupList}
-          setstartDate={setstartDate}
-          setendDate={setendDate}
-        /> */}
-        <GroupForm
-          setgroupName={setgroupName}
-          addGroup={addGroup}
-          groupList={groupList}
-          setgroup={setgroup}
-        />
+        {groupPop ? (
+          <GroupForm
+            setgroupName={setgroupName}
+            addGroup={addGroup}
+            groupList={groupList}
+            setgroup={setgroup}
+            groupPop = {groupPop}
+            setGroupPop = {setGroupPop}
+          />
+        ) : null}
+
         <div className="flex flex-wrap gap-7 h-fit">
+        <button
+            onClick={() => setGroupPop(true)}
+            className="btn-component bg-[#222834] w-fit px-3 px-1 rounded-2xl hover:cursor-pointer"
+          >
+            Add Group
+          </button>
           <button
             onClick={() => seteventPop(true)}
-            className="bg-blue-500 w-fit px-3 px-1 rounded-2xl hover:cursor-pointer"
+            className="btn-component bg-[#222834] w-fit px-3 px-1 rounded-2xl hover:cursor-pointer"
           >
             Add Event
           </button>
           <button
-            className="bg-blue-500 w-fit px-3 px-1 rounded-2xl hover:cursor-pointer"
+            className="btn-component bg-[#222834] w-fit px-3 px-1 rounded-2xl hover:cursor-pointer"
             onClick={deleteSelectedEvent}
           >
             Delete Selected Event
           </button>
-          <div className="flex gap-2 bg-white shadow-2xl rounded-2xl pl-2">
-            <label htmlFor="addevent" className="text-black">
+          <div className="btn-component bg-[#222834] flex gap-2 shadow-2xl rounded-2xl pl-2">
+            <label htmlFor="addevent" className="text-white">
               Group:{" "}
             </label>
             <select
@@ -400,43 +406,85 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
               ref={groupSelectRef}
               defaultValue=""
               onChange={groupChange}
-              className="text-gray-600 hover:cursor-pointer focus:outline-none focus:border-none"
+              className="text-gray-600 bg-[#222834] w-20 hover:cursor-pointer focus:outline-none focus:border-none"
             >
               <option value="" className="text-black">
-                Select a group
+                Groups
               </option>
-              {groupList.map((group) => (
-                <option key={group.id} value={group.id} className="text-black">
-                  {group.content}
-                </option>
-              ))}
+              {groupList.map((group) => {
+                if (group.nestedGroups && group.nestedGroups.length > 0) {
+                  return (
+                    <optgroup
+                      key={group.id}
+                      label={group.content}
+                      className="text-black"
+                    >
+                      {group.nestedGroups.map((nestedId) => {
+                        const nestedGroup = groupList.find(
+                          (g) => g.id === nestedId
+                        );
+                        return (
+                          nestedGroup && (
+                            <option
+                              key={nestedGroup.id}
+                              value={nestedGroup.id}
+                              className="text-black"
+                            >
+                              ─ {nestedGroup.content}
+                            </option>
+                          )
+                        );
+                      })}
+                    </optgroup>
+                  );
+                }
+              })}
+
+              {groupList
+                .filter(
+                  (group) =>
+                    !groupList.some((parentGroup) =>
+                      parentGroup.nestedGroups?.includes(group.id)
+                    )
+                )
+                .map((group) => (
+                  <option
+                    key={group.id}
+                    value={group.id}
+                    className="text-black"
+                  >
+                    {group.content}
+                  </option>
+                ))}
             </select>
             <button
               onClick={deleteGroup}
-              className="bg-blue-500 rounded-2xl px-2 hover:cursor-pointer"
+              className="bg-[#4666ae] font-semibold rounded-2xl px-2 hover:cursor-pointer"
             >
               Delete
             </button>
           </div>
           <button
-            className="bg-blue-500 w-fit px-3 px-1 rounded-2xl hover:cursor-pointer"
+            className="btn-component bg-[#222834] w-fit px-3 px-1 rounded-2xl hover:cursor-pointer"
             onClick={showEvents}
           >
-            Show All Events in Console
+            Show All Events
           </button>
           <button
             onClick={reset}
-            className="bg-blue-500 w-20 rounded-2xl hover:cursor-pointer"
+            className="btn-component bg-[#222834] w-20 rounded-2xl hover:cursor-pointer"
           >
             Resize
           </button>
         </div>
       </div>
       <div className="flex gap-5">
-        <div className="flex flex-col w-1/2 bg-gray-100 border border-gray-300 pl-4 h-[300px] rounded-lg mt-4 text-black">
-          <h3 className="text-lg font-semibold mb-2">Event detail: </h3>
+        {/* <div className="container-component bg-[#1d2127] flex flex-col w-1/2 border border-gray-300 pl-4 h-[300px] rounded-lg mt-4 text-black">
+          <h3 className="text-lg font-semibold mb-2 mt-4 text-white">
+            Event detail:{" "}
+          </h3>
           {eventDetail ? (
-            <div className="text-black">
+            <div className="bg-[#ffffff00] text-white">
               <p>Name: {eventDetail.content}</p>
               <p>Start: {eventDetail.start.toString()}</p>
               {eventDetail.end ? (
@@ -446,17 +494,19 @@ const VisTimeline = ({ enable, setEnable, eventPop, seteventPop }) => {
               )}
             </div>
           ) : (
-            <p>No events available.</p>
+            <p className="text-white">No events available.</p>
           )}
-        </div>
-        <div className="flex flex-col w-1/2 bg-gray-100 border border-gray-300 pl-4 h-[300px] rounded-lg mt-4 text-black">
-          <h3 className="text-lg font-semibold mb-2">All events: </h3>
+        </div> */}
+        <div className="container-component bg-[#1d2127] flex flex-col w-full border border-gray-300 pl-4 h-[300px] rounded-lg mt-4 text-black">
+          <h3 className="text-lg text-white font-semibold mb-2 mt-4">
+            All events:{" "}
+          </h3>
 
           <textarea
             value={eventsList}
             readOnly
             onChange={(e) => setJsonData(e.target.value)}
-            className="w-full h-full p-2 font-mono focus:outline-none"
+            className="bg-[#ffffff00] w-full h-full p-2 font-mono focus:outline-none text-white"
           />
         </div>
       </div>
