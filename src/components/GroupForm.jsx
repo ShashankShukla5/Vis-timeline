@@ -40,7 +40,7 @@ function GroupForm({ setgroupName, addGroup, groupList, setgroup, groupPop, setG
     });
 
   return (
-    <div ref={popUpRef} className="absolute z-20 top-[-1.875rem] left-95 w-70 group-form flex flex-col  gap-2 bg-white shadow-2xl text-black rounded-2xl p-2">
+    <div ref={popUpRef} className="fixed z-20 top-25 left-122 w-70 group-form flex flex-col  gap-2 bg-white shadow-2xl text-black rounded-2xl p-2">
       <p className="mb-5 text-[#f5f6f8]">Add New Group</p>
       <div className="flex gap-2">
         <label htmlFor="name" className="text-[#f5f6f8]">
@@ -68,7 +68,7 @@ function GroupForm({ setgroupName, addGroup, groupList, setgroup, groupPop, setG
           onChange={groupChange}
           className="text-gray-600 hover:cursor-pointer w-full bg-[#222834] rounded-2xl px-2"
         >
-          <option value="" className="text-black">
+          <option value="" className="text-gray-400">
             Select a group
           </option>
           {groupList.map((group) => {
@@ -77,7 +77,7 @@ function GroupForm({ setgroupName, addGroup, groupList, setgroup, groupPop, setG
                 <optgroup
                   key={group.id}
                   label={group.content}
-                  className="text-black"
+                  className="text-gray-400"
                 >
                   {group.nestedGroups.map((nestedId) => {
                     const nestedGroup = groupList.find(
@@ -88,7 +88,7 @@ function GroupForm({ setgroupName, addGroup, groupList, setgroup, groupPop, setG
                         <option
                           key={nestedGroup.id}
                           value={nestedGroup.id}
-                          className="text-black"
+                          className="text-white"
                         >
                           ─ {nestedGroup.content}
                         </option>
@@ -108,7 +108,7 @@ function GroupForm({ setgroupName, addGroup, groupList, setgroup, groupPop, setG
                 )
             )
             .map((group) => (
-              <option key={group.id} value={group.id} className="text-black">
+              <option key={group.id} value={group.id} className="text-white">
                 {group.content}
               </option>
             ))}

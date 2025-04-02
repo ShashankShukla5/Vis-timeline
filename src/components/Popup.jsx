@@ -27,6 +27,9 @@ function Popup({
   const [sDateValidation, setSDateValidation] = useState(false);
   const [eDateValidation, setEDateValidation] = useState(false);
   const [groupValidation, setGroupValidation] = useState(false);
+  const [sDateColor, setSDateColor] = useState(false)
+  const [eDateColor, setEDateColor] = useState(false)
+  const [drop, setDrop] = useState(false)
 
   const popUpRef = useRef(null);
   const nameRef = useRef(null);
@@ -92,16 +95,19 @@ function Popup({
   const startChange = (e) => {
     setstartDate(e.target.value);
     setSDateValidation(false);
+    setSDateColor(true)
   };
 
   const endChange = (e) => {
     setendDate(e.target.value);
     setEDateValidation(false);
+    setEDateColor(true)
   };
 
   const groupChange = (e) => {
     setgroup(e.target.value);
     setGroupValidation(false);
+    setDrop(true)
   };
 
   useEffect(() => {
@@ -128,7 +134,7 @@ function Popup({
   return (
     <div
       ref={popUpRef}
-      className="absolute z-20 top-[-1.875rem] left-95 group-form flex flex-col w-80 gap-4 bg-[#161a1f] shadow-2xl text-black rounded-2xl p-4"
+      className="fixed z-20 top-25 left-122 group-form flex flex-col w-90 gap-4 bg-[#161a1f] shadow-2xl text-black rounded-2xl p-7"
     >
       <p className="mb-5 text-white">{eventPop ? "Add new event" : "Edit Event"}</p>
       <div className="flex gap-2 justify-between">
@@ -141,7 +147,7 @@ function Popup({
             defaultValue={eventPop ? "" : defName}
             placeholder="Enter event name"
             onChange={nameChange}
-            className="w-45 py-1 bg-[#222834] text-white rounded-md px-2 focus:outline-none placeholder:text-gray-600"
+            className="w-50 py-1 bg-[#222834] text-white rounded-md px-2 focus:outline-none placeholder:text-gray-600"
           />
           {nameValidation ? (
             <p className="text-red-500 text-[0.625rem]">Name is required</p>
@@ -153,11 +159,11 @@ function Popup({
         <div className="flex flex-col items-start">
           <input
             id="name"
-            type="date"
+            type="datetime-local"
             ref={startRef}
             defaultValue={eventPop ? "" : defSDate}
             onChange={startChange}
-            className="w-45 bg-[#222834] rounded-md px-2 focus:outline-none placeholder:text-gray-600 text-white"
+            className={`w-50 bg-[#222834] rounded-md px-2 focus:outline-none ${enable ? 'text-white' : sDateColor ? 'text-white' : 'text-gray-600'}`}
           />
           {sDateValidation ? (
             <p className="text-red-500 text-[0.625rem]">Date is required</p>
@@ -169,11 +175,11 @@ function Popup({
         <div className="flex flex-col items-start">
           <input
             id="name"
-            type="date"
+            type="datetime-local"
             ref={endRef}
             defaultValue={eventPop ? "" : defEDate}
             onChange={endChange}
-            className="w-45 bg-[#222834] rounded-md px-2 focus:outline-none placeholder:text-gray-600 text-white"
+            className={`w-50 bg-[#222834] rounded-md px-2 focus:outline-none placeholder:text-gray-600 ${enable ? 'text-white' : eDateColor ? 'text-white' : 'text-gray-600'}`}
           />
           {eDateValidation ? (
             <p className="text-red-500 text-[0.625rem]">Date is required</p>
@@ -193,9 +199,9 @@ function Popup({
                 ref={groupRef}
                 defaultValue={eventPop ? "" : defGroup}
                 onChange={groupChange}
-                className="w-45 text-gray-600 hover:cursor-pointer bg-[#222834] rounded-2xl px-2"
+                className={`w-50 text-gray-600 hover:cursor-pointer bg-[#222834] rounded-2xl px-2 ${enable ? 'text-white' : drop ? 'text-white' : 'text-gray-600'}`}
               >
-                <option value="">
+                <option value="" className="text-gray-400">
                   Select a group
                 </option>
                 {groupList.map((group) => {
@@ -204,7 +210,7 @@ function Popup({
                       <optgroup
                         key={group.id}
                         label={group.content}
-                        className="text-black"
+                        className="text-gray-400"
                       >
                         {group.nestedGroups.map((nestedId) => {
                           const nestedGroup = groupList.find(
@@ -215,7 +221,7 @@ function Popup({
                               <option
                                 key={nestedGroup.id}
                                 value={nestedGroup.id}
-                                className="text-black"
+                                className="text-white"
                               >
                                 ─ {nestedGroup.content}
                               </option>
@@ -238,7 +244,7 @@ function Popup({
                     <option
                       key={group.id}
                       value={group.id}
-                      className="text-black"
+                      className="text-white"
                     >
                       {group.content}
                     </option>
