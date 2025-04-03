@@ -1,48 +1,63 @@
 import React, { useRef, useEffect } from "react";
 
-function GroupForm({ setgroupName, addGroup, groupList, setgroup, groupPop, setGroupPop }) {
+function GroupForm({
+  addGroup,
+  groupList,
+  groupPop,
+  setGroupPop,
+  setFormData,
+}) {
   const nameRef = useRef(null);
   const groupRef = useRef(null);
-  const popUpRef = useRef(null)
+  const popUpRef = useRef(null);
 
   function newGroup() {
     addGroup();
     nameRef.current.value = "";
     groupRef.current.value = "";
-    setGroupPop(false)
+    setGroupPop(false);
   }
 
   const nameChange = (e) => {
-    setgroupName(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      name: e.target.value,
+    }));
   };
 
   const groupChange = (e) => {
-    setgroup(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      group: e.target.value,
+    }));
   };
 
   useEffect(() => {
-      const handleMouseClick = (e) => {
-        if (popUpRef.current && !popUpRef.current.contains(e.target)) {
-          setGroupPop(false);
-        }
-        if (e.key === "Escape") {
-          setGroupPop(false);
-        }
-      };
-      if (groupPop) {
-        document.addEventListener("mousedown", handleMouseClick);
-        document.addEventListener("keydown", handleMouseClick);
+    const handleMouseClick = (e) => {
+      if (popUpRef.current && !popUpRef.current.contains(e.target)) {
+        setGroupPop(false);
       }
-      return () => {
-        document.removeEventListener("mousedown", handleMouseClick);
-        document.removeEventListener("keydown", handleMouseClick);
-      };
-    });
+      if (e.key === "Escape") {
+        setGroupPop(false);
+      }
+    };
+    if (groupPop) {
+      document.addEventListener("mousedown", handleMouseClick);
+      document.addEventListener("keydown", handleMouseClick);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleMouseClick);
+      document.removeEventListener("keydown", handleMouseClick);
+    };
+  });
 
   return (
-    <div ref={popUpRef} className="fixed z-20 top-25 left-122 w-70 group-form flex flex-col  gap-2 bg-white shadow-2xl text-black rounded-2xl p-2">
+    <div
+      ref={popUpRef}
+      className="fixed z-20 top-25 left-122 w-80 group-form flex flex-col  gap-2 bg-white shadow-2xl text-black rounded-2xl p-7"
+    >
       <p className="mb-5 text-[#f5f6f8]">Add New Group</p>
-      <div className="flex gap-2">
+      <div className="flex gap-4">
         <label htmlFor="name" className="text-[#f5f6f8]">
           Name:
         </label>
@@ -55,8 +70,7 @@ function GroupForm({ setgroupName, addGroup, groupList, setgroup, groupPop, setG
           className="w-50 py-1 bg-[#222834] rounded-md px-2 focus:outline-none placeholder:text-gray-600"
         />
       </div>
-      <div className="flex gap-2"></div>
-      <div className="flex gap-2">
+      <div className="flex gap-4">
         <label htmlFor="addevent" className="text-[#f5f6f8]">
           Parent:{" "}
         </label>

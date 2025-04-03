@@ -1,45 +1,34 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Timeline } from "vis-timeline";
 
 function Popup({
-  setgroup,
-  setname,
   addEvent,
   groupList,
-  setendDate,
-  setstartDate,
   setEnable,
   popUpUpdate,
   enable,
-  setdefGroup,
-  defGroup,
   seteventPop,
   eventPop,
   validation,
   setValidation,
-  defName,
-  defSDate,
-  defEDate,
-  setdefName,
-  setdefSDate,
-  setdefEDate,
+  formData,
+  setFormData,
+  timelineAdd,
+  setTimelineAdd,
 }) {
   const [nameValidation, setNameValidation] = useState(false);
   const [sDateValidation, setSDateValidation] = useState(false);
   const [eDateValidation, setEDateValidation] = useState(false);
   const [groupValidation, setGroupValidation] = useState(false);
-  const [sDateColor, setSDateColor] = useState(false)
-  const [eDateColor, setEDateColor] = useState(false)
-  const [drop, setDrop] = useState(false)
+  const [sDateColor, setSDateColor] = useState(false);
+  const [eDateColor, setEDateColor] = useState(false);
+  const [dropColor, setDropColor] = useState(false);
 
   const popUpRef = useRef(null);
   const nameRef = useRef(null);
   const startRef = useRef(null);
   const endRef = useRef(null);
   const groupRef = useRef(null);
-
-  // useEffect(()=>{
-
-  // })
 
   function updateEvent() {
     if (
@@ -74,40 +63,79 @@ function Popup({
     if (eventPop) {
       addEvent();
       seteventPop(false);
+      setFormData((prev) => ({
+        ...prev,
+        startDate: null,
+        group: null,
+      }));
     }
     if (enable) {
       popUpUpdate();
       setEnable(false);
-      setdefGroup(null);
+      setFormData((prev) => ({
+        ...prev,
+        group: null,
+      }));
+    }
+    if (timelineAdd) {
+      addEvent();
+      setTimelineAdd(false);
+      setFormData((prev) => ({
+        ...prev,
+        startDate: null,
+        group: null,
+      }));
     }
 
     groupRef.current.value = "";
     nameRef.current.value = "";
     startRef.current.value = "";
     endRef.current.value = "";
+
+    setFormData((prev) => ({
+      ...prev,
+      startDate: null,
+    }));
+
+    setFormData((prev) => ({
+      ...prev,
+      group: null,
+    }));
   }
 
   const nameChange = (e) => {
-    setname(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      name: e.target.value,
+    }));
     setNameValidation(false);
   };
 
   const startChange = (e) => {
-    setstartDate(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      startDate: e.target.value,
+    }));
     setSDateValidation(false);
-    setSDateColor(true)
+    setSDateColor(true);
   };
 
   const endChange = (e) => {
-    setendDate(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      endDate: e.target.value,
+    }));
     setEDateValidation(false);
-    setEDateColor(true)
+    setEDateColor(true);
   };
 
   const groupChange = (e) => {
-    setgroup(e.target.value);
+    setFormData((prev) => ({
+      ...prev,
+      group: e.target.value,
+    }));
     setGroupValidation(false);
-    setDrop(true)
+    setDropColor(true);
   };
 
   useEffect(() => {
@@ -115,13 +143,25 @@ function Popup({
       if (popUpRef.current && !popUpRef.current.contains(e.target)) {
         setEnable(false);
         seteventPop(false);
+        setTimelineAdd(false);
+        setFormData((prev) => ({
+          ...prev,
+          startDate: null,
+          group: null,
+        }));
       }
       if (e.key === "Escape") {
         setEnable(false);
         seteventPop(false);
+        setTimelineAdd(false);
+        setFormData((prev) => ({
+          ...prev,
+          startDate: null,
+          group: null,
+        }));
       }
     };
-    if (enable || eventPop) {
+    if (enable || eventPop || timelineAdd) {
       document.addEventListener("mousedown", handleMouseClick);
       document.addEventListener("keydown", handleMouseClick);
     }
@@ -136,15 +176,19 @@ function Popup({
       ref={popUpRef}
       className="fixed z-20 top-25 left-122 group-form flex flex-col w-90 gap-4 bg-[#161a1f] shadow-2xl text-black rounded-2xl p-7"
     >
-      <p className="mb-5 text-white">{eventPop ? "Add new event" : "Edit Event"}</p>
+      <p className="mb-5 text-white">
+        {eventPop ? "Add new event" : "Edit Event"}
+      </p>
       <div className="flex gap-2 justify-between">
-        <label htmlFor="name" className="text-white">Name:</label>
+        <label htmlFor="name" className="text-white">
+          Name:
+        </label>
         <div className="flex flex-col items-start">
           <input
             id="name"
             type="text"
             ref={nameRef}
-            defaultValue={eventPop ? "" : defName}
+            defaultValue={eventPop ? "" : formData.name}
             placeholder="Enter event name"
             onChange={nameChange}
             className="w-50 py-1 bg-[#222834] text-white rounded-md px-2 focus:outline-none placeholder:text-gray-600"
@@ -155,15 +199,31 @@ function Popup({
         </div>
       </div>
       <div className="flex gap-2 justify-between">
-        <label htmlFor="name" className="text-white">Start date:</label>
+        <label htmlFor="name" className="text-white">
+          Start date:
+        </label>
         <div className="flex flex-col items-start">
           <input
             id="name"
             type="datetime-local"
             ref={startRef}
-            defaultValue={eventPop ? "" : defSDate}
+            defaultValue={
+              eventPop
+                ? formData.startDate
+                  ? formData.startDate
+                  : ""
+                : formData.startDate
+            }
             onChange={startChange}
-            className={`w-50 bg-[#222834] rounded-md px-2 focus:outline-none ${enable ? 'text-white' : sDateColor ? 'text-white' : 'text-gray-600'}`}
+            className={`w-50 bg-[#222834] rounded-md px-2 focus:outline-none ${
+              eventPop
+                ? sDateColor
+                  ? "text-white"
+                  : "text-gray-600"
+                : formData.startDate
+                ? "text-white"
+                : "text-gray-600"
+            }`}
           />
           {sDateValidation ? (
             <p className="text-red-500 text-[0.625rem]">Date is required</p>
@@ -171,15 +231,25 @@ function Popup({
         </div>
       </div>
       <div className="flex gap-2 justify-between">
-        <label htmlFor="name" className="text-white">End date:</label>
+        <label htmlFor="name" className="text-white">
+          End date:
+        </label>
         <div className="flex flex-col items-start">
           <input
             id="name"
             type="datetime-local"
             ref={endRef}
-            defaultValue={eventPop ? "" : defEDate}
+            defaultValue={eventPop ? "" : formData.endDate}
             onChange={endChange}
-            className={`w-50 bg-[#222834] rounded-md px-2 focus:outline-none placeholder:text-gray-600 ${enable ? 'text-white' : eDateColor ? 'text-white' : 'text-gray-600'}`}
+            className={`w-50 bg-[#222834] rounded-md px-2 focus:outline-none placeholder:text-gray-600 ${
+              eventPop || timelineAdd
+                ? eDateColor
+                  ? "text-white"
+                  : "text-gray-600"
+                : formData.endDate
+                ? "text-white"
+                : "text-gray-600"
+            }`}
           />
           {eDateValidation ? (
             <p className="text-red-500 text-[0.625rem]">Date is required</p>
@@ -190,16 +260,32 @@ function Popup({
         <div className="flex flex-col gap-3">
           <div className="flex justify-between gap-2">
             <div>
-              <label htmlFor="addevent" className="text-white">Group: </label>
+              <label htmlFor="addevent" className="text-white">
+                Group:{" "}
+              </label>
             </div>
             <div>
               <select
                 name="addevent"
                 id="addevent"
                 ref={groupRef}
-                defaultValue={eventPop ? "" : defGroup}
+                defaultValue={
+                  eventPop
+                    ? formData.group
+                      ? formData.group
+                      : ""
+                    : formData.group
+                }
                 onChange={groupChange}
-                className={`w-50 text-gray-600 hover:cursor-pointer bg-[#222834] rounded-2xl px-2 ${enable ? 'text-white' : drop ? 'text-white' : 'text-gray-600'}`}
+                className={`w-50 text-gray-600 hover:cursor-pointer bg-[#222834] rounded-2xl px-2 ${
+                  eventPop
+                    ? dropColor
+                      ? "text-white"
+                      : "text-gray-600"
+                    : formData.group
+                    ? "text-white"
+                    : "text-gray-600"
+                }`}
               >
                 <option value="" className="text-gray-400">
                   Select a group

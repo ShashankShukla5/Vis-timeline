@@ -4,7 +4,8 @@ let groups = [
   { id: 3, content: "Group B", nestedGroups: [4], showNested: false },
   { id: 4, content: "Group B1", parentGroup: 3, showNested: false },
   { id: 5, content: "Group C", showNested: false},
-  { id: 6, content: "Group D", showNested: false},
+  // { id: 6, content: "Group D", showNested: false},
+  // { id: 7, content: "Group E", showNested: false},
 ];
 
 export default groups;

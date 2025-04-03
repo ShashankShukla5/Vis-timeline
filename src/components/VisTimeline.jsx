@@ -15,25 +15,25 @@ const VisTimeline = ({
   seteventPop,
   groupPop,
   setGroupPop,
+  timelineAdd,
+  setTimelineAdd
 }) => {
   const timelineRef = useRef(null);
   const groupsRef = useRef(null);
   const itemsRef = useRef(new DataSet([]));
   const timelineInstance = useRef(null);
-  const [group, setgroup] = useState(null);
-  const [name, setname] = useState("");
-  const [startDate, setstartDate] = useState("");
-  const [endDate, setendDate] = useState("");
   const [eventDetail, setEventDetail] = useState();
   const [eventsList, setEventsList] = useState([]);
   const [groupName, setgroupName] = useState(null);
   const [groupList, setgroupList] = useState(groups);
   const groupSelectRef = useRef(null);
   const [doubleClickId, setdoubleClickId] = useState(null);
-  const [defGroup, setdefGroup] = useState(null);
-  const [defName, setdefName] = useState("");
-  const [defSDate, setdefSDate] = useState(null);
-  const [defEDate, setdefEDate] = useState(null);
+  const [formData, setFormData] = useState({
+    name: null,
+    startDate: null,
+    endDate: null,
+    group: null,
+  });
 
   const start = new Date("2024-01-01T12:00");
   const end = new Date(start);
@@ -56,7 +56,7 @@ const VisTimeline = ({
         showCurrentTime: true,
         zoomable: true,
         showTooltips: true,
-        height: "220px",
+        height: "225px",
         maxHeight: "600px",
         verticalScroll: true,
         cluster: {
@@ -73,6 +73,10 @@ const VisTimeline = ({
           remove: true,
           overrideItems: false,
         },
+        onRemove: function (item, callback) {
+          callback(item);
+          adjustTimeLineBounds();
+        },
       };
       timelineInstance.current = new Timeline(
         timelineRef.current,
@@ -86,28 +90,52 @@ const VisTimeline = ({
 
     if (timelineInstance.current) {
       timelineInstance.current.redraw();
-      const range = timelineInstance.current.getWindow();
-      timelineInstance.current.setWindow(range.start, range.end);
+      // const range = timelineInstance.current.getWindow();
+      // timelineInstance.current.setWindow(range.start, range.end);
     }
 
     timelineInstance.current.on("doubleClick", function (props) {
+      if (!props.item) {
+        var sDate = new Date(props.time);
+
+        setTimelineAdd(true)
+        const offset = sDate.getTimezoneOffset();
+        const localStartDate = new Date(sDate.getTime() - offset * 60000);
+
+        setFormData(prev => ({
+          ...prev,
+          startDate: localStartDate.toISOString().slice(0, 16),
+          group: props.group
+        }))
+      }
       if (props.item) {
         var sDate = new Date(itemsRef.current.get(props.item).start);
         var eDate = new Date(itemsRef.current.get(props.item).end);
 
         setEnable(true);
         setdoubleClickId(props.item);
-        setdefGroup(itemsRef.current.get(props.item).group);
-        setdefName(itemsRef.current.get(props.item).content);
+        setFormData(prev => ({
+          ...prev,
+          group: itemsRef.current.get(props.item).group
+        }))
+        setFormData(prev => ({
+          ...prev,
+          name: itemsRef.current.get(props.item).content
+        }))
 
         const offset = sDate.getTimezoneOffset();
 
         const localStartDate = new Date(sDate.getTime() - offset * 60000);
         const localEndDate = new Date(eDate.getTime() - offset * 60000);
 
-        setdefSDate(localStartDate.toISOString().slice(0, 16));
-        setdefEDate(localEndDate.toISOString().slice(0, 16));
-        console.log(localStartDate.toISOString().slice(0, 16));
+        setFormData(prev => ({
+          ...prev,
+          startDate: localStartDate.toISOString().slice(0, 16)
+        }))
+        setFormData(prev => ({
+          ...prev,
+          endDate: localStartDate.toISOString().slice(0, 16)
+        }))
       }
     });
 
@@ -147,8 +175,12 @@ const VisTimeline = ({
     minDate.setDate(minDate.getDate() - 60);
     maxDate.setDate(maxDate.getDate() + 60);
 
-    timelineInstance.current.setWindow(minDate, maxDate);
-    
+    timelineInstance.current.setOptions({
+      min: minDate,
+      max: maxDate,
+      cluster: true,
+    });
+
     reset();
     timelineInstance.current.redraw();
   }
@@ -169,23 +201,29 @@ const VisTimeline = ({
     const colors = ["red", "blue", "green", "yellow", "purple"];
     const newId = countObjects(timelineInstance.current.itemSet.items) + 1;
 
+    console.log(formData.endDate);
+
     const newEvent = {
       id: newId,
-      content: name ? name : `Event ${newId}`,
+      content: formData.name ? formData.name : `Event ${newId}`,
       title: `It is event ${newId} <br>Start: ${
-        startDate
-          ? startDate.toString()
+        formData.startDate
+          ? formData.startDate.toString()
           : new Date(start).toISOString().split("T")[0]
       } <br>End: ${
-        endDate ? endDate.toString() : new Date(end).toISOString().split("T")[0]
+        formData.endDate ? formData.endDate.toString() : new Date(end).toISOString().split("T")[0]
       }`,
-      start: startDate ? startDate.toString() : new Date(start).toISOString(),
-      end: endDate ? endDate.toString() : new Date(end).toISOString(),
-      group: group ? group : 1,
+      start: formData.startDate ? formData.startDate.toString() : new Date(start).toISOString(),
+      end: formData.endDate ? formData.endDate.toString() : new Date(end).toISOString(),
+      group: formData.group ? formData.group : 1,
       className: colors[Math.floor(Math.random() * colors.length)],
     };
+
     itemsRef.current.add(newEvent);
-    setgroup(null);
+    setFormData(prev => ({
+      ...prev,
+      group: null
+    }))
     alert("New Item added");
     adjustTimeLineBounds();
     return;
@@ -194,9 +232,8 @@ const VisTimeline = ({
   const addGroup = () => {
     const newId = groupsRef.current.length;
 
-    if (group) {
-      console.log(group);
-      var groupId = parseInt(group);
+    if (formData.group) {
+      var groupId = parseInt(formData.group);
       const getGroup = groupsRef.current.get(groupId);
 
       if (!getGroup.nestedGroups) {
@@ -225,7 +262,7 @@ const VisTimeline = ({
 
     const newGroup = {
       id: newId + 1,
-      content: groupName ? groupName : `New Grp ${newId + 1}`,
+      content: formData.name ? formData.name : `New Grp ${newId + 1}`,
       parentGroup: groupId,
     };
 
@@ -234,7 +271,6 @@ const VisTimeline = ({
     setgroupList(groupsRef.current.get());
     alert("New group added");
     return;
-    console.log(groupList);
   };
 
   const popUpUpdate = () => {
@@ -246,10 +282,10 @@ const VisTimeline = ({
     console.log(item);
     itemsRef.current.update({
       id: doubleClickId,
-      content: name ? name : item.content,
-      start: startDate ? startDate : sDate,
-      end: endDate ? endDate : eDate,
-      group: group ? group : item.group,
+      content: formData.name ? formData.name : item.content,
+      start: formData.startDate ? formData.startDate : sDate,
+      end: formData.endDate ? formData.endDate : eDate,
+      group: formData.group ? formData.group : item.group,
     });
     timelineInstance.current.redraw();
   };
@@ -268,7 +304,7 @@ const VisTimeline = ({
   };
 
   const deleteGroup = () => {
-    const groupId = parseInt(group, 10);
+    const groupId = parseInt(formData.group, 10);
     if (!groupId) {
       alert("Select group to delete");
       return;
@@ -309,7 +345,10 @@ const VisTimeline = ({
   }
 
   const groupChange = (e) => {
-    setgroup(e.target.value);
+    setFormData(prev => ({
+      ...prev,
+      group: e.target.value
+    }))
   };
 
   ///////////////////////////////////////////////////////////////////////////
@@ -328,66 +367,48 @@ const VisTimeline = ({
   //////////////////////////////////////////////////////////////////////////////
 
   return (
-    <div className="relative flex flex-col w-full h-fit gap-5 pb-10">
+    <div className="relative flex flex-col w-full h-full gap-5 pb-10">
       {enable ? (
         <Popup
           setEnable={setEnable}
-          setgroup={setgroup}
-          setname={setname}
           addEvent={addEvent}
           groupList={groupList}
-          setstartDate={setstartDate}
-          setendDate={setendDate}
           popUpUpdate={popUpUpdate}
           enable={enable}
-          setdefGroup={setdefGroup}
-          defGroup={defGroup}
-          defName={defName}
-          defSDate={defSDate}
-          defEDate={defEDate}
-          setdefName={setdefName}
-          setdefSDate={setdefSDate}
-          setdefEDate={setdefEDate}
           eventPop={eventPop}
           seteventPop={seteventPop}
+          formData={formData}
+          setFormData={setFormData}
         />
       ) : null}
       <div
         ref={timelineRef}
-        className="timeline w-full h-[14.0625rem] overflow-y-auto"
+        className="timeline bg-orange-400 w-full h-[14.375rem] overflow-y-auto"
       />
       <div className="flex gap-10">
-        {eventPop ? (
+        {(eventPop || timelineAdd) ? (
           <Popup
             setEnable={setEnable}
-            setgroup={setgroup}
-            setname={setname}
             addEvent={addEvent}
             groupList={groupList}
-            setstartDate={setstartDate}
-            setendDate={setendDate}
             popUpUpdate={popUpUpdate}
             enable={enable}
-            setdefGroup={setdefGroup}
-            defGroup={defGroup}
-            defName={defName}
-            defSDate={defSDate}
-            defEDate={defEDate}
             eventPop={eventPop}
             seteventPop={seteventPop}
-            setdefName={setdefName}
-            setdefSDate={setdefSDate}
-            setdefEDate={setdefEDate}
+            formData={formData}
+            setFormData={setFormData}
+            timelineAdd={timelineAdd}
+            setTimelineAdd={setTimelineAdd}
           />
         ) : null}
         {groupPop ? (
           <GroupForm
-            setgroupName={setgroupName}
             addGroup={addGroup}
             groupList={groupList}
-            setgroup={setgroup}
             groupPop={groupPop}
             setGroupPop={setGroupPop}
+            formData={formData}
+            setFormData={setFormData}
           />
         ) : null}
 
@@ -423,7 +444,7 @@ const VisTimeline = ({
               className="text-gray-600 bg-[#222834] w-30 hover:cursor-pointer focus:outline-none focus:border-none"
             >
               <option value="" className="text-gray-400">
-                Groups
+                Select group
               </option>
               {groupList.map((group) => {
                 if (group.nestedGroups && group.nestedGroups.length > 0) {
