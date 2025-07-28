@@ -1,0 +1,139 @@
+#root {
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  background-color: #181c21;
+}
+
+/* ----------------------------------------TIMELINE START------------------------------------------------------------------ */
+.vis-timeline {
+  border-radius: 12px;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+  background-color:white;
+  padding: 10px;
+}
+
+.vis-panel .vis-left .vis-vertical-scroll{
+  background-color:#0d0f11;
+}
+
+.vis-item {
+  border-radius: 8px !important;
+  box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease-in-out;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.vis-item.red {
+  background: #ff4d4d !important;
+  color: white !important;
+}
+
+.vis-item.blue {
+  background: #4285f4 !important;
+  color: white !important;
+}
+
+.vis-item.green {
+  background: #34a853 !important;
+  color: white !important;
+}
+
+.vis-item.yellow {
+  background: #fbbc05 !important;
+  color: black !important;
+}
+
+.vis-item.purple {
+  background: #aa66cc !important;
+  color: white !important;
+}
+
+.vis-item:hover {
+  transform: scale(1.05);
+}
+
+.vis-current-time {
+  background-color: #ff4d4d !important;
+  height: 3px;
+}
+
+.vis-grid {
+  border-color: #ddd !important;
+}
+
+.vis-tooltip {
+  background-color: rgba(0, 0, 0, 0.727) !important;
+  color: white !important;
+  font-size: 14px !important;
+  padding: 8px !important;
+  border-radius: 5px !important;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+  max-width: 200px;
+}
+
+.vis-time-axis {
+  background-color: rgb(52, 52, 52) !important;
+}
+
+.vis-time-axis .vis-grid {
+  background-color: rgb(0, 0, 0) !important;
+}
+
+.vis-time-axis .vis-text {
+  color: rgb(255, 255, 255) !important;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.vis-panel {
+  background-color: rgb(52, 52, 52);
+}
+.vis-panel.vis-left {
+  background-color: black;
+}
+
+.vis-panel.vis-center{
+  background-color: black;
+}
+
+.vis-label {
+  font-size: 14px !important;
+  font-weight: bold !important;
+  color: #ffffff !important;
+}
+
+
+
+.vis-panel.vis-left {
+  min-width: 250px !important;
+}
+
+.vis-labelset .vis-label {
+  border: none;
+}
+
+.vis-label.vis-nested-group.vis-group-level-unknown-but-gte1{
+  background-color: rgb(52, 49, 49) !important;
+}
+
+.vis-item.vis-cluster{
+  background: cyan;
+}
+/* ----------------------------------------TIMELINE END------------------------------------------------------------------ */
+
+.timeline {
+  border-radius: 12px;
+  background: #16191d;
+  box-shadow: -6px -6px 22px #0d0f11, 6px 6px 22px #1f2329;
+}
+
+.group-form, .bt-component, .container-component{
+  background: rgba(0, 0, 0, 0.566);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  backdrop-filter: blur(4.5px);
+  -webkit-backdrop-filter: blur(4.5px);
+  border-radius: 12px;
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
+}
